@@ -20,7 +20,7 @@ from botbuilder.dialogs.choices import Choice
 from botbuilder.core import MessageFactory, UserState
 
 from data_models import UserProfile
-
+import jieba
 
 class UserProfileDialog(ComponentDialog):
     def __init__(self, user_state: UserState):
@@ -36,24 +36,14 @@ class UserProfileDialog(ComponentDialog):
                     self.name_step,
                     self.name_confirm_step,
                     self.query_step,
-                    #self.picture_step,
-                    #self.confirm_step,
                     self.summary_step,
                 ],
             )
         )
         self.add_dialog(TextPrompt(TextPrompt.__name__))
-        # self.add_dialog(
-        #     NumberPrompt(NumberPrompt.__name__, UserProfileDialog.age_prompt_validator)
-        # )
         self.add_dialog(ChoicePrompt(ChoicePrompt.__name__))
         self.add_dialog(ConfirmPrompt(ConfirmPrompt.__name__))
-        # self.add_dialog(
-        #     AttachmentPrompt(
-        #         AttachmentPrompt.__name__, UserProfileDialog.picture_prompt_validator
-        #     )
-        # )
-
+        
         self.initial_dialog_id = WaterfallDialog.__name__
 
     async def podcast_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
@@ -97,7 +87,7 @@ class UserProfileDialog(ComponentDialog):
 
     async def query_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         if step_context.result:
-            # User said "yes" so we will be prompting for the age.
+            # User said "yes" so we will be prompting for the query.
             # WaterfallStep always finishes with the end of the Waterfall or with another dialog,
             # here it is a Prompt Dialog.
             return await step_context.prompt(
@@ -106,42 +96,9 @@ class UserProfileDialog(ComponentDialog):
                     prompt=MessageFactory.text("Please enter your query.")),
             )
 
-        # User said "no" so we will skip the next step. Give -1 as the age.
+        # User said "no" so we will skip the next step. Give -1 as the query.
         return await step_context.next(-1)
 
-    # async def picture_step(
-    #     self, step_context: WaterfallStepContext
-    # ) -> DialogTurnResult:
-    #     age = step_context.result
-    #     step_context.values["age"] = age
-
-    #     msg = (
-    #         "No age given."
-    #         if step_context.result == -1
-    #         else f"I have your age as {age}."
-    #     )
-
-    #     # We can send messages to the user at any point in the WaterfallStep.
-    #     await step_context.context.send_activity(MessageFactory.text(msg))
-
-    #     if step_context.context.activity.channel_id == "msteams":
-    #         # This attachment prompt example is not designed to work for Teams attachments, so skip it in this case
-    #         await step_context.context.send_activity(
-    #             "Skipping attachment prompt in Teams channel..."
-    #         )
-    #         return await step_context.next(None)
-
-    #     # WaterfallStep always finishes with the end of the Waterfall or with another dialog; here it is a Prompt
-    #     # Dialog.
-    #     prompt_options = PromptOptions(
-    #         prompt=MessageFactory.text(
-    #             "Please attach a profile picture (or type any message to skip)."
-    #         ),
-    #         retry_prompt=MessageFactory.text(
-    #             "The attachment must be a jpeg/png image file."
-    #         ),
-    #     )
-    #     return await step_context.prompt(AttachmentPrompt.__name__, prompt_options)
 
     # async def confirm_step(
     #     self, step_context: WaterfallStepContext
@@ -173,9 +130,15 @@ class UserProfileDialog(ComponentDialog):
             user_profile.query = step_context.values["query"]
             #user_profile.picture = step_context.values["picture"]
 
-            msg = f"I have your choice of podcast as {user_profile.podcast} and your name as {user_profile.name}."
+            msg = f"Choice of podcast : {user_profile.podcast} \n  Your name : {user_profile.name}\n"
             if user_profile.query != -1:
-                msg += f" And query as {user_profile.query}."
+                msg += f" Query : {user_profile.query}\n"
+                seg_list = jieba.lcut(user_profile.query)
+                seg_list_total = jieba.lcut(user_profile.query, cut_all=True)
+                seg_list_search = jieba.lcut_for_search(user_profile.query)
+                msg += f" Jieba精確模式 : {seg_list}\n"
+                msg += f" Jieba全模式 : {seg_list_total}\n"
+                msg += f" Jieba搜索引擎模式 : {seg_list_search}\n"
 
             await step_context.context.send_activity(MessageFactory.text(msg))
 
@@ -197,34 +160,3 @@ class UserProfileDialog(ComponentDialog):
         # WaterfallStep always finishes with the end of the Waterfall or with another
         # dialog, here it is the end.
         return await step_context.end_dialog()
-
-    # @staticmethod
-    # async def age_prompt_validator(prompt_context: PromptValidatorContext) -> bool:
-    #     # This condition is our validation rule. You can also change the value at this point.
-    #     return (
-    #         prompt_context.recognized.succeeded
-    #         and 0 < prompt_context.recognized.value < 150
-    #     )
-
-    # @staticmethod
-    # async def picture_prompt_validator(prompt_context: PromptValidatorContext) -> bool:
-    #     if not prompt_context.recognized.succeeded:
-    #         await prompt_context.context.send_activity(
-    #             "No attachments received. Proceeding without a profile picture..."
-    #         )
-
-    #         # We can return true from a validator function even if recognized.succeeded is false.
-    #         return True
-
-    #     attachments = prompt_context.recognized.value
-
-    #     valid_images = [
-    #         attachment
-    #         for attachment in attachments
-    #         if attachment.content_type in ["image/jpeg", "image/png"]
-    #     ]
-
-    #     prompt_context.recognized.value = valid_images
-
-    #     # If none of the attachments are valid images, the retry prompt should be sent.
-    #     return len(valid_images) > 0
