@@ -54,7 +54,7 @@ class UserProfileDialog(ComponentDialog):
             ChoicePrompt.__name__,
             PromptOptions(
                 prompt=MessageFactory.text("Please select the podcast you are interested in."),
-                choices=[Choice("好味小姐"), Choice("股癌"), Choice("百靈果")],
+                choices=[Choice("好味小姐"), Choice("股癌"), Choice("百靈果"), Choice("好味小姐"), Choice("股癌"), Choice("百靈果"), Choice("好味小姐"), Choice("股癌"), Choice("百靈果"),Choice("好味小姐"), Choice("股癌"), Choice("百靈果"),Choice("好味小姐"), Choice("股癌"), Choice("百靈果")],
             ),
         )
 
