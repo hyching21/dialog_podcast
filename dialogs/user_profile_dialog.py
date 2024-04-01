@@ -52,7 +52,7 @@ class UserProfileDialog(ComponentDialog):
             ChoicePrompt.__name__,
             PromptOptions(
                 prompt=MessageFactory.text("Please select the podcast you are interested in."),
-                choices=[Choice("podcastA"), Choice("podcastB"), Choice("podcastC")],
+                choices=[Choice("podcast A"), Choice("podcast B"), Choice("podcast C")],
             ),
         )
 
@@ -67,7 +67,7 @@ class UserProfileDialog(ComponentDialog):
         return await step_context.prompt(
                 TextPrompt.__name__,
                 PromptOptions(
-                    prompt=MessageFactory.text("Please enter your query.\nUse , to separate each term.")),
+                    prompt=MessageFactory.text("Please enter your query.\nUse，to separate each term.")),
         )
     
     async def confirm_step( self, step_context: WaterfallStepContext) -> DialogTurnResult:
@@ -110,10 +110,15 @@ class UserProfileDialog(ComponentDialog):
                 PromptOptions(prompt=MessageFactory.text("Do you want to search for another podcast program?")),
                 )
         else:
+            step_context.values["search_another"] = step_context.result
             return await step_context.continue_dialog()
 
     async def final_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
-        search_another = step_context.result
+        if step_context.values["satisfied"]:
+            search_another = step_context.values["search_another"]
+        else: 
+            search_another = step_context.result
+            
         if search_another:
             return await step_context.replace_dialog(self.initial_dialog_id)
         else:
