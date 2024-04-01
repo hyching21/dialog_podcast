@@ -52,15 +52,16 @@ class UserProfileDialog(ComponentDialog):
             ChoicePrompt.__name__,
             PromptOptions(
                 prompt=MessageFactory.text("Please select the podcast you are interested in."),
-                choices=[Choice("好味小姐"), Choice("股癌"), Choice("百靈果")],
+                choices=[Choice("podcastA"), Choice("podcastB"), Choice("podcastC")],
             ),
         )
 
     async def query_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
-        step_context.values["podcast"] = step_context.result
+        podcast = step_context.result.value
+        step_context.values["podcast"] = podcast
 
         await step_context.context.send_activity(
-            MessageFactory.text(f"Your choice is {step_context.result}.")
+            MessageFactory.text(f"Your choice is {podcast}.")
         )
 
         return await step_context.prompt(
