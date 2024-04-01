@@ -9,7 +9,6 @@ class UserProfile:
       This is our application state. Just a regular serializable Python class.
     """
 
-    def __init__(self, name: str = None, podcast: str = None, query: str = None):
-        self.name = name
+    def __init__(self, podcast: str = None, query: str = None):
         self.podcast = podcast
         self.query = query
