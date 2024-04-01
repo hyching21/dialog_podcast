@@ -57,10 +57,10 @@ class UserProfileDialog(ComponentDialog):
         )
 
     async def query_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
-        step_context.values["podcast"] = step_context.result.value
+        step_context.values["podcast"] = step_context.result
 
         await step_context.context.send_activity(
-            MessageFactory.text(f"Your choice is {step_context.result.value}.")
+            MessageFactory.text(f"Your choice is {step_context.result}.")
         )
 
         return await step_context.prompt(
