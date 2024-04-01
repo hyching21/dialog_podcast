@@ -57,16 +57,16 @@ class UserProfileDialog(ComponentDialog):
         )
 
     async def query_step( self, step_context: WaterfallStepContext) -> DialogTurnResult:
-        step_context.values["podcast"] = step_context.result
+        step_context.values["podcast"] = step_context.result.values
 
         await step_context.context.send_activity(
-            MessageFactory.text(f"Your choice is {step_context.result}.")
+            MessageFactory.text(f"Your choice is {step_context.values["podcast"]}.")
         )
 
         return await step_context.prompt(
                 TextPrompt.__name__,
                 PromptOptions(
-                    prompt=MessageFactory.text("Please enter your query. (Use 「,」 to separate each term.)")),
+                    prompt=MessageFactory.text("Please enter your query.\n(Use , to separate each term.)")),
         )
     
     async def confirm_step( self, step_context: WaterfallStepContext) -> DialogTurnResult:
