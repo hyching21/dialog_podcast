@@ -80,7 +80,7 @@ class UserProfileDialog(ComponentDialog):
         user_profile.podcast = step_context.values["podcast"]
         user_profile.query = step_context.values["query"]
         processor = TextProcessor()
-        seg_list =  processor.word_segmentation(user_profile.query, False)
+        seg_list =  processor.word_segmentation(user_profile.query, True)
         msg = f"Choice of podcast : {user_profile.podcast} \nYour query : {seg_list}"
         await step_context.context.send_activity(MessageFactory.text(msg))
 
