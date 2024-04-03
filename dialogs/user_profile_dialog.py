@@ -21,7 +21,7 @@ from botbuilder.core import MessageFactory, UserState
 
 from data_models import UserProfile
 import jieba
-from text_processor import*
+from .text_processor import*
 
 class UserProfileDialog(ComponentDialog):
     def __init__(self, user_state: UserState):
