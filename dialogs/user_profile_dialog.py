@@ -79,9 +79,11 @@ class UserProfileDialog(ComponentDialog):
         )    
         user_profile.podcast = step_context.values["podcast"]
         user_profile.query = step_context.values["query"]
+
         processor = TextProcessor()
         seg_list =  processor.word_segmentation(user_profile.query, True)
         msg = f"Choice of podcast : {user_profile.podcast} \nYour query : {seg_list}"
+
         await step_context.context.send_activity(MessageFactory.text(msg))
 
         return await step_context.prompt(
@@ -105,7 +107,8 @@ class UserProfileDialog(ComponentDialog):
         if not step_context.values["satisfied"]:
             query_another = step_context.result
             if query_another: #modify -> 回到query_step
-                return await step_context.replace_dialog(self.initial_dialog_id)
+                step_context.context.active_dialog.state["stepIndex"] = step_context.context.active_dialog.state["stepIndex"] - 3
+                return await self.query_step(step_context)
             else:         
                 return await step_context.prompt(
                 ConfirmPrompt.__name__,
