@@ -21,7 +21,7 @@ from botbuilder.core import MessageFactory, UserState
 
 from data_models import UserProfile
 import jieba
-from .text_processor import*
+from .text_processor import TextProcessor
 
 class UserProfileDialog(ComponentDialog):
     def __init__(self, user_state: UserState):
@@ -79,7 +79,8 @@ class UserProfileDialog(ComponentDialog):
         )    
         user_profile.podcast = step_context.values["podcast"]
         user_profile.query = step_context.values["query"]
-        seg_list =  word_segmentation(user_profile.query, True)
+        processor = TextProcessor()
+        seg_list =  processor.word_segmentation(user_profile.query, False)
         msg = f"Choice of podcast : {user_profile.podcast} \nYour query : {seg_list}"
         await step_context.context.send_activity(MessageFactory.text(msg))
 
