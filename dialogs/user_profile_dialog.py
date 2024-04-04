@@ -107,8 +107,9 @@ class UserProfileDialog(ComponentDialog):
         if not step_context.values["satisfied"]:
             query_another = step_context.result
             if query_another: #modify -> 回到query_step
-                step_context.context.active_dialog.state["stepIndex"] = step_context.context.active_dialog.state["stepIndex"] - 3
-                return await self.query_step(step_context)
+                # step_context.context.active_dialog.state["stepIndex"] = step_context.context.active_dialog.state["stepIndex"] - 3
+                # return await self.query_step(step_context)
+                return await step_context.replace_dialog(self.initial_dialog_id)
             else:         
                 return await step_context.prompt(
                 ConfirmPrompt.__name__,
