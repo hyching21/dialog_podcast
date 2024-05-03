@@ -1,4 +1,5 @@
 import jieba
+jieba.set_dictionary('dict.txt.big.txt')   
 
 class TextProcessor:
     def __init__(self, stopwords_file="stopwords.txt"):
