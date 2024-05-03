@@ -52,8 +52,8 @@ class UserProfileDialog(ComponentDialog):
         return await step_context.prompt(
             ChoicePrompt.__name__,
             PromptOptions(
-                prompt=MessageFactory.text("Please select the podcast you are interested in."),
-                choices=[Choice("podcast A"), Choice("podcast B"), Choice("podcast C")],
+                prompt=MessageFactory.text("請選擇你有興趣查詢的Podcast節目~"),
+                choices=[Choice("好味小姐"), Choice("唐陽雞酒屋"), Choice("股癌")],
             ),
         )
 
@@ -62,13 +62,13 @@ class UserProfileDialog(ComponentDialog):
         step_context.values["podcast"] = podcast
 
         await step_context.context.send_activity(
-            MessageFactory.text(f"Your choice is {podcast}.")
+            MessageFactory.text(f"你的選擇是：{podcast}.")
         )
 
         return await step_context.prompt(
                 TextPrompt.__name__,
                 PromptOptions(
-                    prompt=MessageFactory.text("Please enter your query.\nUse，to separate each term.")),
+                    prompt=MessageFactory.text("請輸入你想搜尋的內容，若是輸入關鍵字，請用「，」分隔。")),
         )
     
     async def confirm_step( self, step_context: WaterfallStepContext) -> DialogTurnResult:
@@ -82,13 +82,13 @@ class UserProfileDialog(ComponentDialog):
 
         processor = TextProcessor()
         seg_list =  processor.word_segmentation(user_profile.query, True)
-        msg = f"Choice of podcast : {user_profile.podcast} \nYour query : {seg_list}"
+        msg = f"節目：{user_profile.podcast} \n搜尋內容：{seg_list}"
 
         await step_context.context.send_activity(MessageFactory.text(msg))
 
         return await step_context.prompt(
             ConfirmPrompt.__name__,
-            PromptOptions(prompt=MessageFactory.text("Are you satisfied with the search result?")),
+            PromptOptions(prompt=MessageFactory.text("是否滿意此搜尋結果？")),
         )
     
     async def summary_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
@@ -96,12 +96,12 @@ class UserProfileDialog(ComponentDialog):
         if step_context.values["satisfied"]:
             return await step_context.prompt(
                 ConfirmPrompt.__name__,
-                PromptOptions(prompt=MessageFactory.text("Do you want to search for another podcast program?")),
+                PromptOptions(prompt=MessageFactory.text("你想搜尋其他的Podcast節目嗎？")),
             )
         else:
             return await step_context.prompt(
                 ConfirmPrompt.__name__,
-                PromptOptions(prompt=MessageFactory.text("Do you want to enter your query again?")),
+                PromptOptions(prompt=MessageFactory.text("是否要再重新輸入搜尋內容呢？")),
             )
     async def handle_query_again(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         if not step_context.values["satisfied"]:
@@ -113,7 +113,7 @@ class UserProfileDialog(ComponentDialog):
             else:         
                 return await step_context.prompt(
                 ConfirmPrompt.__name__,
-                PromptOptions(prompt=MessageFactory.text("Do you want to search for another podcast program?")),
+                PromptOptions(prompt=MessageFactory.text("你想搜尋其他的Podcast節目嗎？")),
                 )
         else:
             step_context.values["search_another"] = step_context.result
@@ -128,5 +128,5 @@ class UserProfileDialog(ComponentDialog):
         if search_another:
             return await step_context.replace_dialog(self.initial_dialog_id)
         else:
-            await step_context.context.send_activity(MessageFactory.text('Thank you~'))
+            await step_context.context.send_activity(MessageFactory.text('搜尋結束，謝謝您~'))
             return await step_context.end_dialog()
