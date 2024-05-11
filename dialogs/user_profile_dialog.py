@@ -90,9 +90,9 @@ class UserProfileDialog(ComponentDialog):
         processor = TextProcessor()
         user_query = processor.word_segmentation(user_profile.query, True)
         db_query = CosmosDBQuery(connection_string, 'Score','stopwords.txt')
-        # resulting_terms = db_query.process_query(user_query)
-        # search_result = (json.dumps(resulting_terms, ensure_ascii=False, indent=4))
-        msg = f"節目：{user_profile.podcast} \n搜尋內容：{user_query}"
+        resulting_terms = db_query.process_query(user_query)
+        search_result = (json.dumps(resulting_terms, ensure_ascii=False, indent=4))
+        msg = f"節目：{user_profile.podcast} \n搜尋內容：{search_result}"
 
         await step_context.context.send_activity(MessageFactory.text(msg))
 
