@@ -42,7 +42,7 @@ async def on_error(context: TurnContext, error: Exception):
         "To continue to run this bot, please fix the bot source code."
     )
     # Send a trace activity if we're talking to the Bot Framework Emulator
-    if context.activity.channel_id == "emulator":
+    if context.activity.channel_id == "line":
         # Create a trace activity that contains the error object
         trace_activity = Activity(
             label="TurnError",
