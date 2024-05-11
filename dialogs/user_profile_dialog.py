@@ -122,7 +122,7 @@ class UserProfileDialog(ComponentDialog):
     async def final_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         step_context.values["search_again"] = step_context.result
         if step_context.values["search_again"]:
-            step_context.ActiveDialog.State["stepIndex"] = int(step_context.ActiveDialog.State["stepIndex"]) - 3
+            await step_context.context.send_activity(MessageFactory.text('請重新點選搜尋按鈕'))
             return await step_context.replace_dialog(self.initial_dialog_id)
         else:
             await step_context.context.send_activity(MessageFactory.text('搜尋結束，謝謝您~'))
