@@ -19,7 +19,7 @@ class TextProcessor:
         return stopword_list
 
     def word_segmentation(self, text, need_remove_stopwords):
-        seg_list = jieba.lcut(text)
+        seg_list = jieba.lcut_for_search(text)
         filtered_seg_list = []
         if need_remove_stopwords:
             for word in seg_list:
@@ -30,7 +30,7 @@ class TextProcessor:
         else:
             return seg_list
 
-    
+
 
 
 

@@ -18,10 +18,13 @@ from botbuilder.dialogs.prompts import (
 )
 from botbuilder.dialogs.choices import Choice
 from botbuilder.core import MessageFactory, UserState
+import os
+import json
+connection_string = os.getenv("COSMOS_DB_CONNECTION_STRING")
 
 from data_models import UserProfile
-import jieba
 from .text_processor import TextProcessor
+from .query_db import CosmosDBQuery
 
 class UserProfileDialog(ComponentDialog):
     def __init__(self, user_state: UserState):
@@ -49,20 +52,23 @@ class UserProfileDialog(ComponentDialog):
         self.initial_dialog_id = WaterfallDialog.__name__
 
     async def podcast_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
-        return await step_context.prompt(
-            ChoicePrompt.__name__,
-            PromptOptions(
-                prompt=MessageFactory.text("請選擇你有興趣查詢的Podcast節目~"),
-                choices=[Choice("好味小姐"), Choice("唐陽雞酒屋"), Choice("股癌")],
-            ),
-        )
+        if step_context.context.activity.text == "search":
+            return await step_context.prompt(
+                ChoicePrompt.__name__,
+                PromptOptions(
+                    prompt=MessageFactory.text("請選擇你有興趣查詢的Podcast節目~"),
+                    choices=[Choice("好味小姐"), Choice("唐陽雞酒屋"), Choice("股癌")],
+                )
+            )
+        else:
+            return await step_context.context.send_activity(step_context.context.activity.text)
 
     async def query_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         podcast = step_context.result.value
         step_context.values["podcast"] = podcast
 
         await step_context.context.send_activity(
-            MessageFactory.text(f"你的選擇是：{podcast}.")
+            MessageFactory.text(f"你的選擇是：{podcast}")
         )
 
         return await step_context.prompt(
@@ -81,8 +87,11 @@ class UserProfileDialog(ComponentDialog):
         user_profile.query = step_context.values["query"]
 
         processor = TextProcessor()
-        seg_list =  processor.word_segmentation(user_profile.query, True)
-        msg = f"節目：{user_profile.podcast} \n搜尋內容：{seg_list}"
+        user_query = processor.word_segmentation(user_profile.query, True)
+        db_query = CosmosDBQuery(connection_string, 'Score','stopwords.txt')
+        resulting_terms = db_query.process_query(user_query)
+        search_result = (json.dumps(resulting_terms, ensure_ascii=False, indent=4))
+        msg = f"節目：{user_profile.podcast} \n搜尋內容：{search_result}"
 
         await step_context.context.send_activity(MessageFactory.text(msg))
 
