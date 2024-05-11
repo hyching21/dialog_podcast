@@ -93,7 +93,7 @@ class UserProfileDialog(ComponentDialog):
         str_query = ' '.join(user_query) # 轉成 string 格式
         db_query = CosmosDBQuery(connection_string, 'Score','stopwords.txt')
         resulting_terms = db_query.process_query(str_query) # return 搜尋結果
-        formatted_output = ""
+        # formatted_output = ""
         
         reply = MessageFactory.list([])
         reply.attachment_layout = AttachmentLayoutTypes.carousel
@@ -101,7 +101,7 @@ class UserProfileDialog(ComponentDialog):
             doc_id = doc['document_id']
             terms = ', '.join([f'"{term}": {term_data["freq"]}' for term, term_data in doc['terms'].items()])
             url = doc['url']
-            formatted_output += f"{idx}. {doc_id}\n{terms}\n"
+            # formatted_output += f"{idx}. {doc_id}\n{terms}\n"
 
             card = HeroCard(
                 title = doc_id,
@@ -110,7 +110,7 @@ class UserProfileDialog(ComponentDialog):
                         url="https://images.pexels.com/photos/6686442/pexels-photo-6686442.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
                     )
                 ],
-                text = terms,
+                text = "\n"+terms,
                 buttons=[
                     CardAction(
                         type=ActionTypes.open_url,
@@ -121,10 +121,8 @@ class UserProfileDialog(ComponentDialog):
             )
             reply.attachments.append(CardFactory.hero_card(card))
 
-        # msg = f"節目：{user_profile.podcast}\n\n"
-        # msg += formatted_output
         await step_context.context.send_activity(reply)
-        # await step_context.context.send_activity(MessageFactory.text(msg))
+        
 
         return await step_context.prompt(
             ConfirmPrompt.__name__,
