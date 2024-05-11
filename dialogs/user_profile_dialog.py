@@ -64,23 +64,7 @@ class UserProfileDialog(ComponentDialog):
             )
         else:
             return DialogTurnResult(DialogTurnStatus.Complete)
-    def create_hero_card(self) -> Attachment:
-        card = HeroCard(
-            title="",
-            images=[
-                CardImage(
-                    url="https://sec.ch9.ms/ch9/7ff5/e07cfef0-aa3b-40bb-9baa-7c9ef8ff7ff5/buildreactionbotframework_960.jpg"
-                )
-            ],
-            buttons=[
-                CardAction(
-                    type=ActionTypes.open_url,
-                    title="Get Started",
-                    value="https://docs.microsoft.com/en-us/azure/bot-service/",
-                )
-            ],
-        )
-        return CardFactory.hero_card(card)
+    
     async def query_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         podcast = step_context.result.value
         step_context.values["podcast"] = podcast
