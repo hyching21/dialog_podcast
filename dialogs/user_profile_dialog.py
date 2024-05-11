@@ -21,8 +21,8 @@ from botbuilder.dialogs.choices import Choice
 from botbuilder.core import MessageFactory, UserState
 import os
 import json
-connection_string = os.environ.get("COSMOS_DB_CONNECTION_STRING","")
-
+# connection_string = os.environ.get("COSMOS_DB_CONNECTION_STRING","")
+connection_string = "AccountEndpoint=https://podcast-db.documents.azure.com:443/;AccountKey=DoRCS7H22IZFqyVckO2WnEeXuC1jUL1x5m2PbnBp7bBISuJDkKEV1llIKKVNWblrZ4dLIyJQHLg3ACDbLVZujA==;"
 from data_models import UserProfile
 from .text_processor import TextProcessor
 from .query_db import CosmosDBQuery
@@ -88,10 +88,11 @@ class UserProfileDialog(ComponentDialog):
         user_profile.query = step_context.values["query"]
 
         processor = TextProcessor()
-        user_query = processor.word_segmentation(user_profile.query, True)
+        user_query = processor.word_segmentation(user_profile.query, True) # 斷詞後的 query list 型態
+        str_query = ' '.join(user_query) # 轉成 string 格式
         db_query = CosmosDBQuery(connection_string, 'Score','stopwords.txt')
-        resulting_terms = db_query.process_query(user_query)
-        search_result = (json.dumps(resulting_terms, ensure_ascii=False, indent=4))
+        resulting_terms = db_query.process_query(str_query) # return 搜尋結果
+        search_result = (json.dumps(resulting_terms, ensure_ascii=False, indent=4)) # 轉成 json 格式輸出
         msg = f"節目：{user_profile.podcast} \n搜尋內容：{search_result}"
 
         await step_context.context.send_activity(MessageFactory.text(msg))

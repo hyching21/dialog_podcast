@@ -17,8 +17,17 @@ class TextProcessor:
                 line = line.strip()
                 stopword_list.append(line)
         return stopword_list
+    
 
-    def word_segmentation(self, text, need_remove_stopwords):
+    def word_segmentation(self,text,need_remove_stopwords):
+        seg_list = jieba.lcut(text)
+        if need_remove_stopwords:
+            filtered_seg_list = [word for word in seg_list if word not in self.stopwords and word.strip()]
+            return filtered_seg_list
+        else:
+            return seg_list  
+
+    '''def word_segmentation(self, text, need_remove_stopwords):
         seg_list = jieba.lcut_for_search(text)
         filtered_seg_list = []
         if need_remove_stopwords:
@@ -28,9 +37,7 @@ class TextProcessor:
                         filtered_seg_list.append(word)
             return filtered_seg_list
         else:
-            return seg_list
-
-
+            return seg_list'''
 
 
 
