@@ -41,7 +41,7 @@ class UserProfileDialog(ComponentDialog):
                     self.query_step,
                     self.confirm_step,
                     self.summary_step,
-                    self.handle_query_again,
+                    # self.handle_query_again,
                     self.final_step
                 ],
             )
@@ -92,9 +92,15 @@ class UserProfileDialog(ComponentDialog):
         str_query = ' '.join(user_query) # 轉成 string 格式
         db_query = CosmosDBQuery(connection_string, 'Score','stopwords.txt')
         resulting_terms = db_query.process_query(str_query) # return 搜尋結果
-        search_result = (json.dumps(resulting_terms, ensure_ascii=False, indent=4)) # 轉成 json 格式輸出
-        msg = f"節目：{user_profile.podcast} \n搜尋內容：{search_result}"
+        
+        formatted_output = ""
+        for idx, doc in enumerate(resulting_terms['documents'], start=1):
+            doc_id = doc['document_id']
+            terms = ', '.join([f'"{term}": {term_data["freq"]}' for term, term_data in doc['terms'].items()])
+            formatted_output += f"{idx}. {doc_id}\n{terms}\n"
 
+        msg = f"節目：{user_profile.podcast}\n\n"
+        msg += formatted_output
         await step_context.context.send_activity(MessageFactory.text(msg))
 
         return await step_context.prompt(
@@ -103,6 +109,25 @@ class UserProfileDialog(ComponentDialog):
         )
     
     async def summary_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
+        step_context.values["satisfied"] = step_context.result
+        if step_context.values["satisfied"]:
+            await step_context.context.send_activity(MessageFactory.text('搜尋結束，謝謝您~'))
+            return await step_context.end_dialog()
+        else:
+            return await step_context.prompt(
+                ConfirmPrompt.__name__,
+                PromptOptions(prompt=MessageFactory.text("是否要再重新搜尋呢？")),
+            )
+        
+    async def final_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
+        step_context.values["search_again"] = step_context.result
+        if step_context.values["search_again"]:
+            return await step_context.replace_dialog(self.initial_dialog_id)
+        else:
+            await step_context.context.send_activity(MessageFactory.text('搜尋結束，謝謝您~'))
+            return await step_context.end_dialog()
+
+    '''async def summary_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         step_context.values["satisfied"] = step_context.result
         if step_context.values["satisfied"]:
             return await step_context.prompt(
@@ -140,4 +165,4 @@ class UserProfileDialog(ComponentDialog):
             return await step_context.replace_dialog(self.initial_dialog_id)
         else:
             await step_context.context.send_activity(MessageFactory.text('搜尋結束，謝謝您~'))
-            return await step_context.end_dialog()
+            return await step_context.end_dialog()'''
