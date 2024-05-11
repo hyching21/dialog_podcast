@@ -53,7 +53,7 @@ class UserProfileDialog(ComponentDialog):
         self.initial_dialog_id = WaterfallDialog.__name__
 
     async def podcast_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
-        if step_context.context.activity.text == "@search":
+        if step_context.context.activity.text:
             return await step_context.prompt(
                 ChoicePrompt.__name__,
                 PromptOptions(
@@ -122,6 +122,7 @@ class UserProfileDialog(ComponentDialog):
     async def final_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         step_context.values["search_again"] = step_context.result
         if step_context.values["search_again"]:
+            step_context.ActiveDialog.State["stepIndex"] = int(step_context.ActiveDialog.State["stepIndex"]) - 3
             return await step_context.replace_dialog(self.initial_dialog_id)
         else:
             await step_context.context.send_activity(MessageFactory.text('搜尋結束，謝謝您~'))
