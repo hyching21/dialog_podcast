@@ -52,7 +52,7 @@ class UserProfileDialog(ComponentDialog):
         self.initial_dialog_id = WaterfallDialog.__name__
 
     async def podcast_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
-        if step_context.context.activity.text == "search":
+        if step_context.context.activity.text == "@search":
             return await step_context.prompt(
                 ChoicePrompt.__name__,
                 PromptOptions(
@@ -60,8 +60,8 @@ class UserProfileDialog(ComponentDialog):
                     choices=[Choice("好味小姐"), Choice("唐陽雞酒屋"), Choice("股癌")],
                 )
             )
-        else:
-            return await step_context.context.send_activity(step_context.context.activity.text)
+        # else:
+        #     return await step_context.context.send_activity(step_context.context.activity.text)
 
     async def query_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         podcast = step_context.result.value
@@ -91,7 +91,7 @@ class UserProfileDialog(ComponentDialog):
         db_query = CosmosDBQuery(connection_string, 'Score','stopwords.txt')
         resulting_terms = db_query.process_query(user_query)
         search_result = (json.dumps(resulting_terms, ensure_ascii=False, indent=4))
-        msg = f"節目：{user_profile.podcast} \n搜尋內容：{search_result}"
+        msg = f"節目：{user_profile.podcast} \n搜尋內容：{user_query}"
 
         await step_context.context.send_activity(MessageFactory.text(msg))
 
