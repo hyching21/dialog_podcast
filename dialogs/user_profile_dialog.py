@@ -21,8 +21,8 @@ from botbuilder.dialogs.choices import Choice
 from botbuilder.core import MessageFactory, UserState
 import os
 import json
-# connection_string = os.environ.get("COSMOS_DB_CONNECTION_STRING","")
-connection_string = 'AccountEndpoint={"code":"BadRequest","message":"Request url is invalid.\r\nActivityId: 37341adf-2268-433f-b95e-aa858758339b, Windows/10.0.20348 cosmos-netstandard-sdk/3.18.0"}'
+connection_string = os.environ.get("COSMOS_DB_CONNECTION_STRING","")
+
 from data_models import UserProfile
 from .text_processor import TextProcessor
 from .query_db import CosmosDBQuery
