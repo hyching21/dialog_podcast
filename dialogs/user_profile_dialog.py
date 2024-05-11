@@ -21,8 +21,8 @@ from botbuilder.dialogs.choices import Choice
 from botbuilder.core import MessageFactory, UserState
 import os
 import json
-# connection_string = os.environ.get("COSMOS_DB_CONNECTION_STRING","")
-connection_string = "AccountEndpoint=https://podcast-db.documents.azure.com:443/;AccountKey=DoRCS7H22IZFqyVckO2WnEeXuC1jUL1x5m2PbnBp7bBISuJDkKEV1llIKKVNWblrZ4dLIyJQHLg3ACDbLVZujA==;"
+connection_string = os.environ.get("COSMOS_DB_CONNECTION_STRING","")
+
 from data_models import UserProfile
 from .text_processor import TextProcessor
 from .query_db import CosmosDBQuery
