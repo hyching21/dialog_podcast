@@ -6,6 +6,7 @@ from botbuilder.dialogs import (
     WaterfallDialog,
     WaterfallStepContext,
     DialogTurnResult,
+    DialogTurnStatus
 )
 from botbuilder.dialogs.prompts import (
     TextPrompt,
@@ -20,8 +21,8 @@ from botbuilder.dialogs.choices import Choice
 from botbuilder.core import MessageFactory, UserState
 import os
 import json
-connection_string = os.getenv("COSMOS_DB_CONNECTION_STRING")
-
+# connection_string = os.environ.get("COSMOS_DB_CONNECTION_STRING","")
+connection_string = 'AccountEndpoint={"code":"BadRequest","message":"Request url is invalid.\r\nActivityId: 37341adf-2268-433f-b95e-aa858758339b, Windows/10.0.20348 cosmos-netstandard-sdk/3.18.0"}'
 from data_models import UserProfile
 from .text_processor import TextProcessor
 from .query_db import CosmosDBQuery
@@ -60,8 +61,8 @@ class UserProfileDialog(ComponentDialog):
                     choices=[Choice("好味小姐"), Choice("唐陽雞酒屋"), Choice("股癌")],
                 )
             )
-        # else:
-        #     return await step_context.context.send_activity(step_context.context.activity.text)
+        else:
+            return DialogTurnResult(DialogTurnStatus.Complete)
 
     async def query_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         podcast = step_context.result.value
@@ -89,8 +90,8 @@ class UserProfileDialog(ComponentDialog):
         processor = TextProcessor()
         user_query = processor.word_segmentation(user_profile.query, True)
         db_query = CosmosDBQuery(connection_string, 'Score','stopwords.txt')
-        resulting_terms = db_query.process_query(user_query)
-        search_result = (json.dumps(resulting_terms, ensure_ascii=False, indent=4))
+        # resulting_terms = db_query.process_query(user_query)
+        # search_result = (json.dumps(resulting_terms, ensure_ascii=False, indent=4))
         msg = f"節目：{user_profile.podcast} \n搜尋內容：{user_query}"
 
         await step_context.context.send_activity(MessageFactory.text(msg))
