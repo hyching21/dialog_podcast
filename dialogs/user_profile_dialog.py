@@ -18,7 +18,8 @@ from botbuilder.dialogs.prompts import (
     PromptValidatorContext,
 )
 from botbuilder.dialogs.choices import Choice
-from botbuilder.core import MessageFactory, UserState
+from botbuilder.core import MessageFactory, UserState, CardFactory
+from botbuilder.schema import (HeroCard, Attachment, CardImage, CardAction, ActionTypes, AttachmentLayoutTypes)
 import os
 import json
 connection_string = os.environ.get("COSMOS_DB_CONNECTION_STRING","")
@@ -53,7 +54,7 @@ class UserProfileDialog(ComponentDialog):
         self.initial_dialog_id = WaterfallDialog.__name__
 
     async def podcast_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
-        if step_context.context.activity.text:
+        if step_context.context.activity.text== "@search" or "Yes":
             return await step_context.prompt(
                 ChoicePrompt.__name__,
                 PromptOptions(
@@ -63,7 +64,23 @@ class UserProfileDialog(ComponentDialog):
             )
         else:
             return DialogTurnResult(DialogTurnStatus.Complete)
-
+    def create_hero_card(self) -> Attachment:
+        card = HeroCard(
+            title="",
+            images=[
+                CardImage(
+                    url="https://sec.ch9.ms/ch9/7ff5/e07cfef0-aa3b-40bb-9baa-7c9ef8ff7ff5/buildreactionbotframework_960.jpg"
+                )
+            ],
+            buttons=[
+                CardAction(
+                    type=ActionTypes.open_url,
+                    title="Get Started",
+                    value="https://docs.microsoft.com/en-us/azure/bot-service/",
+                )
+            ],
+        )
+        return CardFactory.hero_card(card)
     async def query_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         podcast = step_context.result.value
         step_context.values["podcast"] = podcast
@@ -92,16 +109,38 @@ class UserProfileDialog(ComponentDialog):
         str_query = ' '.join(user_query) # 轉成 string 格式
         db_query = CosmosDBQuery(connection_string, 'Score','stopwords.txt')
         resulting_terms = db_query.process_query(str_query) # return 搜尋結果
-        
         formatted_output = ""
+        
+        reply = MessageFactory.list([])
+        reply.attachment_layout = AttachmentLayoutTypes.carousel
         for idx, doc in enumerate(resulting_terms['documents'], start=1):
             doc_id = doc['document_id']
             terms = ', '.join([f'"{term}": {term_data["freq"]}' for term, term_data in doc['terms'].items()])
+            url = doc['url']
             formatted_output += f"{idx}. {doc_id}\n{terms}\n"
 
-        msg = f"節目：{user_profile.podcast}\n\n"
-        msg += formatted_output
-        await step_context.context.send_activity(MessageFactory.text(msg))
+            card = HeroCard(
+                title = doc_id,
+                images=[
+                    CardImage(
+                        url="https://images.pexels.com/photos/6686442/pexels-photo-6686442.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+                    )
+                ],
+                text = terms,
+                buttons=[
+                    CardAction(
+                        type=ActionTypes.open_url,
+                        title="Open URL",
+                        value=url,
+                    )
+                ],
+            )
+            reply.attachments.append(CardFactory.hero_card(card))
+
+        # msg = f"節目：{user_profile.podcast}\n\n"
+        # msg += formatted_output
+        await step_context.context.send_activity(reply)
+        # await step_context.context.send_activity(MessageFactory.text(msg))
 
         return await step_context.prompt(
             ConfirmPrompt.__name__,
@@ -122,7 +161,6 @@ class UserProfileDialog(ComponentDialog):
     async def final_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         step_context.values["search_again"] = step_context.result
         if step_context.values["search_again"]:
-            await step_context.context.send_activity(MessageFactory.text('請重新點選搜尋按鈕'))
             return await step_context.replace_dialog(self.initial_dialog_id)
         else:
             await step_context.context.send_activity(MessageFactory.text('搜尋結束，謝謝您~'))
