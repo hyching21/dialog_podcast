@@ -58,8 +58,8 @@ class UserProfileDialog(ComponentDialog):
             return await step_context.prompt(
                 ChoicePrompt.__name__,
                 PromptOptions(
-                    prompt=MessageFactory.text("請選擇你有興趣查詢的Podcast節目~"),
-                    choices=[Choice("好味小姐"), Choice("唐陽雞酒屋"), Choice("股癌")],
+                    prompt=MessageFactory.text("請選擇你有興趣查詢的Podcast節目～"),
+                    choices=[Choice("好味小姐")],
                 )
             )
         else:
@@ -105,12 +105,12 @@ class UserProfileDialog(ComponentDialog):
 
             card = HeroCard(
                 title = doc_id,
-                images=[
-                    CardImage(
-                        url="https://images.pexels.com/photos/6686442/pexels-photo-6686442.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-                    )
-                ],
-                text = "\n"+terms,
+                # images=[
+                #     CardImage(
+                #         url="https://images.pexels.com/photos/6686442/pexels-photo-6686442.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+                #     )
+                # ],
+                text = "以下為搜尋關鍵字在該集出現的次數:\n" + terms,
                 buttons=[
                     CardAction(
                         type=ActionTypes.open_url,
@@ -137,7 +137,7 @@ class UserProfileDialog(ComponentDialog):
         else:
             return await step_context.prompt(
                 ConfirmPrompt.__name__,
-                PromptOptions(prompt=MessageFactory.text("是否要再重新搜尋呢？")),
+                PromptOptions(prompt=MessageFactory.text("是否要再重新搜尋呢？（提示：輸入越多出現次數高的關鍵字，搜尋結果會更準確唷!）")),
             )
         
     async def final_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
@@ -145,7 +145,7 @@ class UserProfileDialog(ComponentDialog):
         if step_context.values["search_again"]:
             return await step_context.replace_dialog(self.initial_dialog_id)
         else:
-            await step_context.context.send_activity(MessageFactory.text('搜尋結束，謝謝您~'))
+            await step_context.context.send_activity(MessageFactory.text('搜尋結束，謝謝您～'))
             return await step_context.end_dialog()
 
     '''async def summary_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
