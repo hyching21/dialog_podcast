@@ -110,7 +110,7 @@ class UserProfileDialog(ComponentDialog):
                 #         url="https://images.pexels.com/photos/6686442/pexels-photo-6686442.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
                 #     )
                 # ],
-                text = "以下為搜尋關鍵字在該集出現的次數:\n" + terms,
+                text = "以下為搜尋關鍵字在該集出現的次數:\n\n" + terms,
                 buttons=[
                     CardAction(
                         type=ActionTypes.open_url,
@@ -137,7 +137,7 @@ class UserProfileDialog(ComponentDialog):
         else:
             return await step_context.prompt(
                 ConfirmPrompt.__name__,
-                PromptOptions(prompt=MessageFactory.text("是否要再重新搜尋呢？（提示：輸入越多出現次數高的關鍵字，搜尋結果會更準確唷!）")),
+                PromptOptions(prompt=MessageFactory.text("是否要再重新搜尋呢？\n（💡提示：輸入越多出現次數高的關鍵字，搜尋結果會更準確唷！）")),
             )
         
     async def final_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
