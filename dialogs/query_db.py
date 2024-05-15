@@ -59,17 +59,12 @@ class CosmosDBQuery:
             return {}, None, None
     
     def process_query(self, query, k1=1.5, b=0.5):
-        jieba.set_dictionary('dict.txt.big.txt')  
-        terms = query.split()   
-        terms_map = {term: term.upper() for term in terms} 
+        terms = query.split()    
         terms_set = set(terms)
 
         for term in terms:
             segmented_terms = self._word_segmentation(term)
-            for seg_term in segmented_terms:
-                terms_map[seg_term] = seg_term.upper() 
-                terms_set.update(terms_map[seg_term] for seg_term in segmented_terms)
-            
+            terms_set.update(segmented_terms)  
     
         cosmos_results = self._batch_query_cosmos_db(list(terms_set))
         doc_ids = {doc['document_id'] for result in cosmos_results for doc in result['documents']}
@@ -78,15 +73,14 @@ class CosmosDBQuery:
         data = []
         for result in cosmos_results:
             for doc in result['documents']:
-                original_term = next(key for key, val in terms_map.items() if val == result['id'])
-                data.append({'document_id': doc['document_id'], 'term': original_term , 'freq': doc['freq']})
+                data.append({'document_id': doc['document_id'], 'term': result['id'], 'freq': doc['freq']})
   
         df = pd.DataFrame(data)
 
         df_term_counts = df.groupby('term')['document_id'].nunique().reset_index(name='df')
         df = df.merge(df_term_counts, on='term', how='left')
 
-        df['idf'] = df['df'].apply(lambda x: max(1, math.log((total - x + 0.5) / (x + 0.5) + 1)))
+        df['idf'] = df['df'].apply(lambda x: math.log((total - x + 0.5) / (x + 0.5) + 1))
 
         df['length'] = df['document_id'].map(lambda x: docs_details.get(x, {}).get('length', avgdl))
         df['norm_factor'] = df['length'].apply(lambda l: k1 * (1 - b + b * (l / avgdl)))
