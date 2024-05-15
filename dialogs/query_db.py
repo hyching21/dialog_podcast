@@ -59,12 +59,17 @@ class CosmosDBQuery:
             return {}, None, None
     
     def process_query(self, query, k1=1.5, b=0.5):
-        terms = query.split()    
+        jieba.set_dictionary('dict.txt.big.txt')  
+        terms = query.split()   
+        terms_map = {term: term.upper() for term in terms} 
         terms_set = set(terms)
 
         for term in terms:
             segmented_terms = self._word_segmentation(term)
-            terms_set.update(segmented_terms)  
+            for seg_term in segmented_terms:
+                terms_map[seg_term] = seg_term.upper() 
+                terms_set.update(terms_map[seg_term] for seg_term in segmented_terms)
+            
     
         cosmos_results = self._batch_query_cosmos_db(list(terms_set))
         doc_ids = {doc['document_id'] for result in cosmos_results for doc in result['documents']}
@@ -73,7 +78,8 @@ class CosmosDBQuery:
         data = []
         for result in cosmos_results:
             for doc in result['documents']:
-                data.append({'document_id': doc['document_id'], 'term': result['id'], 'freq': doc['freq']})
+                original_term = next(key for key, val in terms_map.items() if val == result['id'])
+                data.append({'document_id': doc['document_id'], 'term': original_term , 'freq': doc['freq']})
   
         df = pd.DataFrame(data)
 
