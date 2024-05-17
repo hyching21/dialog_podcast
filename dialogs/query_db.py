@@ -71,6 +71,11 @@ class CosmosDBQuery:
             
     
         cosmos_results = self._batch_query_cosmos_db(list(terms_set))
+        # if search result is None
+        if cosmos_results == []:
+            output == None
+            return output
+        
         doc_ids = {doc['document_id'] for result in cosmos_results for doc in result['documents']}
         docs_details, total, avgdl = self._batch_fetch_document(doc_ids)
 

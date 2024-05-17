@@ -93,7 +93,11 @@ class UserProfileDialog(ComponentDialog):
         str_query = ' '.join(user_query) # 轉成 string 格式
         db_query = CosmosDBQuery(connection_string, 'Score','stopwords.txt')
         resulting_terms = db_query.process_query(str_query) # return 搜尋結果
-        # formatted_output = ""
+
+        # if search result is None
+        if resulting_terms == None:
+            await step_context.context.send_activity(MessageFactory.text('未查找到相關集數，請重新搜尋'))
+            return await step_context.end_dialog()
         
         reply = MessageFactory.list([])
         reply.attachment_layout = AttachmentLayoutTypes.carousel
@@ -132,7 +136,7 @@ class UserProfileDialog(ComponentDialog):
     async def summary_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         step_context.values["satisfied"] = step_context.result
         if step_context.values["satisfied"]:
-            await step_context.context.send_activity(MessageFactory.text('搜尋結束，謝謝您的使用～歡迎填寫回饋問卷，分享您的想法和建議，這對我們來說非常重要，感謝您！https://forms.gle/e4aWqA5WjBQyXLNk8'))
+            await step_context.context.send_activity(MessageFactory.text('搜尋結束，謝謝您~'))
             return await step_context.end_dialog()
         else:
             text = "是否要再重新搜尋呢？" + "\n" + "（💡提示：輸入越多出現次數高的關鍵字，搜尋結果會更準確唷！）"
