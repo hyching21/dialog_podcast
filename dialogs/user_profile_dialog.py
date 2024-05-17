@@ -136,7 +136,7 @@ class UserProfileDialog(ComponentDialog):
     async def summary_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         step_context.values["satisfied"] = step_context.result
         if step_context.values["satisfied"]:
-            await step_context.context.send_activity(MessageFactory.text('搜尋結束，謝謝您~'))
+            await step_context.context.send_activity(MessageFactory.text('搜尋結束，謝謝您的使用～歡迎填寫回饋問卷，分享您的想法和建議，這對我們來說非常重要，感謝您！https://forms.gle/e4aWqA5WjBQyXLNk8'))
             return await step_context.end_dialog()
         else:
             text = "是否要再重新搜尋呢？" + "\n" + "（💡提示：輸入越多出現次數高的關鍵字，搜尋結果會更準確唷！）"

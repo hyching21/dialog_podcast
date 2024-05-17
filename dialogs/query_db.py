@@ -73,7 +73,7 @@ class CosmosDBQuery:
         cosmos_results = self._batch_query_cosmos_db(list(terms_set))
         # if search result is None
         if cosmos_results == []:
-            output == None
+            output = None
             return output
         
         doc_ids = {doc['document_id'] for result in cosmos_results for doc in result['documents']}
